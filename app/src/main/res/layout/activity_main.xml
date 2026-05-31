@@ -7,73 +7,135 @@
     android:layout_height="match_parent"
     android:background="#9EE9F2">
 
+    <!-- LOGO -->
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
-        android:layout_marginTop="32dp"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_marginTop="20dp"
         android:scaleType="fitCenter"
         app:srcCompat="@drawable/logo"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- TÍTULO -->
     <TextView
         android:id="@+id/txtBoasVindas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:text="Seja Bem-Vindo(a)"
         android:textColor="#0C167C"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-black"
         app:layout_constraintTop_toBottomOf="@id/imageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- TEXTO LOGIN -->
     <TextView
-        android:id="@+id/txtNome"
+        android:id="@+id/txtLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Qual seu nome?"
+        android:layout_marginTop="20dp"
+        android:text="Faça seu Login"
         android:textColor="#0C167B"
-        android:textSize="26sp"
+        android:textSize="22sp"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/txtBoasVindas"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- EMAIL -->
     <EditText
-        android:id="@+id/editNome"
+        android:id="@+id/editEmail"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="32dp"
-        android:hint="Digite seu nome"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
+        android:backgroundTint="#0C167B"
+        android:hint="Digite seu e-mail"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
         android:textAlignment="center"
-        android:textColor="#2196F3"
+        android:textColor="#0C167B"
         android:textColorHint="#3F51B5"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtLogin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtNome" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- SENHA -->
+    <EditText
+        android:id="@+id/editSenha"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="32dp"
+        android:backgroundTint="#0C167B"
+        android:hint="Digite sua senha"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:textAlignment="center"
+        android:textColor="#0C167B"
+        android:textColorHint="#3F51B5"
+        app:layout_constraintTop_toBottomOf="@id/editEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- BOTÃO LOGIN -->
     <Button
         android:id="@+id/btnEntrar"
         android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="32dp"
+        android:layout_height="58dp"
         android:layout_marginStart="64dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="64dp"
         android:backgroundTint="#F45C00"
         android:text="Entrar"
-        android:textColor="#0C167B"
-        android:textSize="24sp"
-        app:layout_constraintTop_toBottomOf="@id/editNome"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/editSenha"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- CONTAINER TEXTO CADASTRO -->
+    <LinearLayout
+        android:id="@+id/layoutCadastro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/btnEntrar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- TEXTO -->
+        <TextView
+            android:id="@+id/txtNaoPossuiCadastro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Não possui cadastro?"
+            android:textColor="#000000"
+            android:textSize="17sp" />
+
+        <!-- LINK -->
+        <TextView
+            android:id="@+id/txtCadastro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="Cadastre-se"
+            android:textColor="#0C167B"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
