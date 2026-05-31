@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1019064982377",
+    "firebase_url": "https://loginimc-bb978-default-rtdb.firebaseio.com",
+    "project_id": "loginimc-bb978",
+    "storage_bucket": "loginimc-bb978.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019064982377:android:eae622108f68ecdcec3bf8",
+        "android_client_info": {
+          "package_name": "com.example.atividadeavaliativa1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnYGwJDU7M_oNbP9-nh9ITy6vceTBkqEA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

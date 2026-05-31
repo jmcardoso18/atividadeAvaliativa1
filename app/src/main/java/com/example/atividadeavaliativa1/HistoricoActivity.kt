@@ -8,25 +8,33 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.SearchView
 import android.widget.Spinner
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.atividadeavaliativa1.model.HistoricoIMC
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class HistoricoActivity : AppCompatActivity() {
 
     private lateinit var recycler: RecyclerView
     private lateinit var adapter: HistoricoAdapter
-    private lateinit var searchNome: SearchView
     private lateinit var spinnerGrau: Spinner
 
-    private var listaFiltrada = mutableListOf<Pessoa>()
+
+    private var listaCompleta = mutableListOf<HistoricoIMC>()
+    private var listaFiltrada = mutableListOf<HistoricoIMC>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_historico)
 
         recycler = findViewById(R.id.recyclerHistorico)
-        searchNome = findViewById(R.id.searchNome)
         spinnerGrau = findViewById(R.id.spinnerGrau)
 
         findViewById<Button>(R.id.btnVoltarHome).setOnClickListener {
@@ -36,85 +44,96 @@ class HistoricoActivity : AppCompatActivity() {
             finish()
         }
 
-        // Inicializa a lista filtrada com todos os dados
-        listaFiltrada = Historico.listaPessoas.toMutableList()
-
-        // Configura RecyclerView
-        adapter = HistoricoAdapter(listaFiltrada)
+        // Configura o Adapter passando a ação de deletar do Firebase
+        adapter = HistoricoAdapter(listaFiltrada) { pessoaSelecionada ->
+            confirmarExclusao(pessoaSelecionada)
+        }
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
+
+        // Busca dados sincronizados do Firebase Realtime Database
+        buscarDadosDoFirebase()
 
         // Configura Spinner
         val opcoesGrau = listOf(
             "Todos",
-            "Abaixo do peso",
-            "Peso normal",
+            "Peso Baixo",
+            "Peso Ideal",
             "Sobrepeso",
-            "Obesidade grau I",
-            "Obesidade grau II",
-            "Obesidade grau III"
+            "Obesidade Grau I",
+            "Obesidade Grau II",
+            "Obesidade Grau III"
         )
-
-        val spinnerAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            opcoesGrau
-        )
-
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, opcoesGrau)
         spinnerGrau.adapter = spinnerAdapter
 
-        // Filtro por nome
-        searchNome.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
+
+        // Filtro por seleção do Spinner
+        spinnerGrau.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 aplicarFiltro(
-                    nome = query ?: "",
-                    grau = spinnerGrau.selectedItem.toString()
+                    spinnerGrau.selectedItem.toString()
                 )
-                return true
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                aplicarFiltro(
-                    nome = newText ?: "",
-                    grau = spinnerGrau.selectedItem.toString()
-                )
-                return true
-            }
-        })
-
-        // Filtro por grau
-        spinnerGrau.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    aplicarFiltro(
-                        nome = searchNome.query.toString(),
-                        grau = spinnerGrau.selectedItem.toString()
-                    )
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                }
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
-    private fun aplicarFiltro(nome: String, grau: String) {
+    private fun buscarDadosDoFirebase() {
+
+        val uid = FirebaseAuth.getInstance()
+            .currentUser
+            ?.uid ?: return
+
+        FirebaseDatabase.getInstance()
+            .getReference("historico_imc")
+            .child(uid)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    listaCompleta.clear()
+
+                    for (itemSnapshot in snapshot.children) {
+
+                        val historico =
+                            itemSnapshot.getValue(HistoricoIMC::class.java)
+
+                        historico?.let {
+                            listaCompleta.add(it)
+                        }
+                    }
+
+                    aplicarFiltro(spinnerGrau.selectedItem.toString())
+                }
+
+
+
+                override fun onCancelled(error: DatabaseError) {
+
+                    Toast.makeText(
+                        this@HistoricoActivity,
+                        "Erro ao carregar dados: ${error.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            })
+    }
+
+    private fun aplicarFiltro(grau: String) {
+
         listaFiltrada.clear()
 
-        val resultado = Historico.listaPessoas.filter { pessoa ->
-            val filtroNome =
-                pessoa.nome.contains(nome, ignoreCase = true)
+        val resultado = listaCompleta.filter {
 
-            val filtroGrau =
-                grau == "Todos" ||
-                        pessoa.classificacao() == grau
-
-            filtroNome && filtroGrau
+            grau == "Todos" ||
+                    it.classificacao.equals(grau, ignoreCase = true)
         }
 
         listaFiltrada.addAll(resultado)
@@ -122,7 +141,42 @@ class HistoricoActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
+    private fun confirmarExclusao(pessoa: HistoricoIMC) {
 
+        val uid = FirebaseAuth.getInstance()
+            .currentUser
+            ?.uid ?: return
 
+        if (pessoa.id.isNullOrEmpty()) return
 
+        AlertDialog.Builder(this)
+            .setTitle("Excluir Registro")
+            .setMessage("Tem certeza de que deseja apagar permanentemente este registro de IMC?")
+            .setPositiveButton("Sim") { _, _ ->
+
+                FirebaseDatabase.getInstance()
+                    .getReference("historico_imc")
+                    .child(uid)
+                    .child(pessoa.id!!)
+                    .removeValue()
+                    .addOnSuccessListener {
+
+                        Toast.makeText(
+                            this,
+                            "Registro excluído com sucesso!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .addOnFailureListener {
+
+                        Toast.makeText(
+                            this,
+                            "Erro ao excluir: ${it.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+            }
+            .setNegativeButton("Não", null)
+            .show()
+    }
 }
